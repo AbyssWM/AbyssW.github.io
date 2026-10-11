@@ -28,7 +28,7 @@ using namespace abyss;
 void configure(Config& c) {
     c.general.gaps_in  = 5;
     c.general.gaps_out = 20;
-    c.bind(SUPER, "Q", spawn("kitty"));
+    c.bind(SUPER, "Q", [] { return exec("kitty"); });
 }
 ```
 
@@ -59,6 +59,23 @@ An option can also be set by its string name with the same checks: `c.set("gener
 
 Per-device settings use `c.device(name, {...})`, for example `c.device("logitech-mx-master", {.sensitivity = -0.5});`.
 
+## Cursor theme and size
+
+Set the theme and logical size in one place:
+
+```cpp
+c.cursor.theme = "Sweet-cursors";
+c.cursor.size  = 24;
+```
+
+An explicit theme is used for both Abysscursor and XCursor clients. Abyssland synchronizes the XCursor fallback, gsettings, XWayland root cursor and `Xcursor.theme` / `Xcursor.size` X resources, preserving unrelated X resources. It exports `XCURSOR_THEME`, `XCURSOR_SIZE`, `ABYSSCURSOR_THEME` and `ABYSSCURSOR_SIZE` to newly launched children.
+
+In a real desktop session these four variables are also sent asynchronously to the D-Bus activation environment and an already running systemd user manager. This works without systemd; no user manager is started. Nested compositors skip activation export so they do not change their parent's launch environment. `ABYSSLAND_NO_SD_VARS=1` disables activation export.
+
+Defaults `theme = ""` and `size = 0` preserve the startup environment's selection, including separate native and XCursor themes. A size of zero uses the startup size (native if available and enabled, otherwise XCursor); invalid environment sizes fall back to 24. `c.cursor.enable_abysscursor = false` selects XCursor rendering. Changing typed cursor options through a config reload or `abyss::set` refreshes the cursor. `abyssctl setcursor <theme> <size>` applies a temporary change; it does not edit your compiled config.
+
+Applications may retain cursors they already loaded. Theme synchronization does not guarantee that every running app immediately reloads its cursor assets.
+
 ## Bundled wallpapers
 
 Abyssland includes seven backgrounds, named `wall0.png` through `wall6.png`.
@@ -83,22 +100,21 @@ assets on the next build and includes them in the installation.
 ```cpp
 const std::string terminal = "kitty";
 
-c.env("XCURSOR_SIZE", "24");          // for the compositor and everything it starts
-c.execOnce("waybar");                 // only on the first load of the session
-c.exec("some-command");               // on every config load
+c.env("GDK_BACKEND", "wayland,x11,*"); // compositor and everything it starts
 c.onStart([] { exec("quickshell"); }); // once per compositor process
 c.onShutdown([] { /* ... */ });
-c.execShutdown("cleanup-command");
 ```
 
-`onStart` is not run again by an in-process reload (`abyssctl reload --no-build`), which makes it the right place for programs that must start only once.
+`exec(command)` starts the command immediately through `/bin/sh -c`, with shell expansion, pipes and redirects. Put it inside a callback for autostart or a keybind. `exec` returns a result, not an `Action`, so `c.bind(..., exec("kitty"))` does not compile. The callback defers execution until the key is pressed.
+
+`onStart` is not run again by an in-process reload (`abyssctl reload --no-build`), which makes it the autostart entry point. A rebuilt compositor is a new process and runs it again. Existing compatibility helpers remain available: `c.exec(command)` runs on every config load, `c.execOnce(command)` starts once per compositor process, and `c.execShutdown(command)` runs on shutdown. Prefer `c.onStart` with `exec` for autostart.
 
 ## Binds and actions
 
 `c.bind(mods, key, action, opts)` registers a keybind. Modifiers are `NONE`, `SHIFT`, `CTRL`, `ALT`, `SUPER` (combine with `|`). Keys are xkb key names, `code:N`, `mouse:N`, `mouse_down`/`mouse_up` and so on. A combined string works too: `c.bind("SUPER+SHIFT+Q", killActive())`.
 
 ```cpp
-c.bind(SUPER, "Q", spawn(terminal));
+c.bind(SUPER, "Q", [terminal] { return exec(terminal); });
 c.bind(SUPER, "C", killActive());
 c.bind(SUPER, "V", toggleFloating());
 c.bind(SUPER, "left", moveFocus(Dir::Left));
@@ -118,7 +134,7 @@ c.bind(SUPER, "mouse:272", mouseMove(), {.mouse = true});
 c.bind(SUPER, "mouse:273", mouseResize(), {.mouse = true});
 
 // media keys, also on the lock screen, repeating while held
-c.bind(NONE, "XF86AudioRaiseVolume", spawn("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
+c.bind(NONE, "XF86AudioRaiseVolume", [] { return exec("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"); },
        {.locked = true, .repeat = true});
 
 // any C++ works as an action
@@ -135,7 +151,7 @@ Actions are values. Pass them to `bind()` or run them from your own code with `r
 
 | Area | Actions |
 |---|---|
-| Programs | `spawn(cmd)`, `spawnRaw(cmd)`, `exit()` |
+| Session | `exit()` |
 | Windows | `killActive()`, `forceKillActive()`, `closeWindow()`, `killWindow()`, `signal()`, `toggleFloating()`, `setFloating()`, `setTiled()`, `pseudo()`, `pin()`, `fullscreen()`, `fullscreenState()`, `centerWindow()`, `setProp()`, `tag()`, `toggleSwallow()` |
 | Focus and movement | `moveFocus(Dir)`, `moveWindow(Dir)`, `moveWindowToMonitor()`, `swapWindow(Dir)`, `swapWith()`, `swapNext()`, `cycleNext()`, `focusWindow()`, `focusUrgentOrLast()`, `focusCurrentOrLast()`, `alterZOrder()` |
 | Size and position | `resizeActive(dx, dy)`, `moveActive(dx, dy)`, `resizeWindowPixel()`, `moveWindowPixel()`, `mouseMove()`, `mouseResize()` |
@@ -145,7 +161,9 @@ Actions are values. Pass them to `bind()` or run them from your own code with `r
 | Misc | `submap()`, `pass()`, `sendShortcut()`, `sendKeyState()`, `global()`, `event()`, `moveCursor()`, `moveCursorToCorner()`, `forceRendererReload()`, `forceIdle()`, `releaseInputCapture()`, `dispatch(name, arg)` |
 | Helpers | `notify(text, ms, color, icon)`, `ok()`, `error(msg)` |
 
-`dispatch(name, arg)` runs any dispatcher by name, see [abyssctl](/wiki/abyssctl).
+`exec(command)` is immediate and returns `SDispatchResult`. Dispatcher actions such as `killActive()` are deferred; utilities such as `notify`, `ok` and `error` run immediately. `spawn` and `spawnRaw` are not public config functions.
+
+`dispatch(name, arg)` creates an action for any dispatcher by name, see [abyssctl](/wiki/abyssctl).
 
 ## Window and layer rules
 
