@@ -59,6 +59,25 @@ An option can also be set by its string name with the same checks: `c.set("gener
 
 Per-device settings use `c.device(name, {...})`, for example `c.device("logitech-mx-master", {.sensitivity = -0.5});`.
 
+## Bundled wallpapers
+
+Abyssland includes seven backgrounds, named `wall0.png` through `wall6.png`.
+The four newest variants show mist and water, a katana with tentacles, a stone
+wall with a gold crack, and a minimal katana scene. They use artwork generated
+with Google Flow for Abyss.
+
+```cpp
+c.misc.disable_abyssland_logo = false;
+c.misc.disable_splash_rendering = true;
+c.misc.force_default_wallpaper = -1; // choose randomly at compositor startup
+// c.misc.force_default_wallpaper = 4; // always use wall4.png
+```
+
+The background stays fixed during the session; there is no timed slideshow.
+An external wallpaper client can cover it. New bundled files belong in
+`assets/install/`, numbered consecutively without gaps. CMake detects added
+assets on the next build and includes them in the installation.
+
 ## Programs, environment and autostart
 
 ```cpp

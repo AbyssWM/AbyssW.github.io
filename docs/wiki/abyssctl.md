@@ -72,7 +72,7 @@ Environment: `ABYSS_SOURCE_DIR` and `ABYSS_BUILD_DIR` override the compiled-in d
 | `kill` | Kill mode: click a window to kill its app, leave with Escape |
 | `notify <icon> <time_ms> <color> <message...>` | Show a notification. Icons: 0 warning, 1 info, 2 hint, 3 error, 4 confused, 5 ok, -1 or 6 none. Color `0` is the default for the icon |
 | `dismissnotify [amount]` | Dismiss all or up to `amount` notifications |
-| `setcursor <theme> <size>` | Set the cursor theme and reload the cursor manager |
+| `setcursor <theme> <size>` | Set the cursor theme and size, update the XCursor fallback, gsettings and the XWayland root cursor, and export cursor variables for newly spawned children |
 | `setprop <regex> <property> <value> [lock]` | Set a window property; with `lock`, dynamic window rules cannot override it |
 | `getprop <regex> <property>` | Get a window property |
 | `switchxkblayout <device> <next\|prev\|id>` | Set the keyboard layout index of a device |
