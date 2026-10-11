@@ -1,0 +1,26 @@
+# Ecosystem
+
+Abyss forks the whole Hyprland stack from [hyprwm](https://github.com/hyprwm), renames it and builds it as one unit. The full upstream history is kept. All repositories live in the GitHub organisation [**AbyssWM**](https://github.com/AbyssWM).
+
+| Repository | Purpose | Based on | Version |
+|---|---|---|---|
+| [Abyssland](https://github.com/AbyssWM/Abyssland) | Compositor | [Hyprland](https://github.com/hyprwm/Hyprland) | 0.56.2 |
+| [Abyssal](https://github.com/AbyssWM/Abyssal) | Rendering backend library | [aquamarine](https://github.com/hyprwm/aquamarine) | 0.15.0 |
+| [Abyssutils](https://github.com/AbyssWM/Abyssutils) | Utility library | [hyprutils](https://github.com/hyprwm/hyprutils) | 0.14.1 |
+| [Abyssparse](https://github.com/AbyssWM/Abyssparse) | Config parser library (LGPL-3) | [hyprlang](https://github.com/hyprwm/hyprlang) | 0.6.8 |
+| [Abysscursor](https://github.com/AbyssWM/Abysscursor) | Cursor themes | [hyprcursor](https://github.com/hyprwm/hyprcursor) | 0.1.13 |
+| [Abyssgraphics](https://github.com/AbyssWM/Abyssgraphics) | Graphics helpers | [hyprgraphics](https://github.com/hyprwm/hyprgraphics) | 0.5.1 |
+| [Abysswire](https://github.com/AbyssWM/Abysswire) | Wire protocol library | [hyprwire](https://github.com/hyprwm/hyprwire) | 0.3.1 |
+| [Abyss-scanner](https://github.com/AbyssWM/Abyss-scanner) | Wayland protocol scanner | [hyprwayland-scanner](https://github.com/hyprwm/hyprwayland-scanner) | 0.4.5 |
+| [Abyssland-protocols](https://github.com/AbyssWM/Abyssland-protocols) | Extra Wayland protocols | [hyprland-protocols](https://github.com/hyprwm/hyprland-protocols) | 0.7.0 |
+| [Xdg-desktop-portal-abyss](https://github.com/AbyssWM/Xdg-desktop-portal-abyss) | Desktop portal (screen sharing, ...) | [xdg-desktop-portal-hyprland](https://github.com/hyprwm/xdg-desktop-portal-hyprland) | 1.4.1 |
+
+"Version" is the upstream release each fork started from. Abyss itself is versioned separately: 0.x during development, **1.0.0** as the first usable release.
+
+## Interfaces are renamed too
+
+Abyss does not pretend to be Hyprland: environment variables are `ABYSSLAND_*`, sockets live in `$XDG_RUNTIME_DIR/abyss`, protocols are called `abyssland_*`, `XDG_CURRENT_DESKTOP` is `Abyssland` and the control tool is `abyssctl`. Lua configs and plugins are removed; configuration is [Abysslang](/wiki/configuration).
+
+## Planned tools
+
+See the [Roadmap](/roadmap) for the lock screen, wallpaper tool and more.

@@ -1,0 +1,97 @@
+/* Abyss "Katana" theme: ink black, cold steel blue, gold */
+:root {
+  --abyss-bg: #050816;
+  --abyss-bg-soft: #0a1022;
+  --abyss-bg-mute: #111a33;
+  --abyss-steel: #80b0d8;
+  --abyss-gold: #c8a25a;
+  --abyss-text: #d6deea;
+  --abyss-text-dim: #8b97ad;
+  --abyss-border: #1b2644;
+
+  --vp-font-family-base: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --vp-font-family-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+
+/* dark (default) */
+:root.dark {
+  --vp-c-bg: var(--abyss-bg);
+  --vp-c-bg-alt: var(--abyss-bg-soft);
+  --vp-c-bg-elv: var(--abyss-bg-soft);
+  --vp-c-bg-soft: var(--abyss-bg-soft);
+  --vp-c-gutter: var(--abyss-border);
+  --vp-c-divider: var(--abyss-border);
+  --vp-c-border: var(--abyss-border);
+  --vp-c-text-1: var(--abyss-text);
+  --vp-c-text-2: var(--abyss-text-dim);
+  --vp-c-text-3: #5f6b84;
+  --vp-c-brand-1: var(--abyss-steel);
+  --vp-c-brand-2: #6a9cc6;
+  --vp-c-brand-3: #4f7fa8;
+  --vp-c-brand-soft: rgba(128, 176, 216, 0.14);
+  --vp-code-block-bg: #070c1c;
+  --vp-code-bg: rgba(128, 176, 216, 0.1);
+  --vp-c-default-soft: rgba(128, 176, 216, 0.1);
+  --vp-c-warning-1: var(--abyss-gold);
+  --vp-c-warning-2: var(--abyss-gold);
+  --vp-c-warning-soft: rgba(200, 162, 90, 0.12);
+  --vp-button-brand-bg: var(--abyss-steel);
+  --vp-button-brand-hover-bg: #98c2e4;
+  --vp-button-brand-active-bg: #6a9cc6;
+  --vp-button-brand-text: #050816;
+  --vp-button-brand-hover-text: #050816;
+  --vp-button-brand-active-text: #050816;
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, var(--abyss-steel) 30%, var(--abyss-gold));
+}
+
+/* light (optional) */
+:root:not(.dark) {
+  --vp-c-bg: #f6f7fa;
+  --vp-c-bg-alt: #eceff5;
+  --vp-c-bg-soft: #eceff5;
+  --vp-c-brand-1: #2f6a9a;
+  --vp-c-brand-2: #3a79ae;
+  --vp-c-brand-3: #4f8cc0;
+  --vp-c-brand-soft: rgba(47, 106, 154, 0.12);
+  --vp-c-warning-1: #8a6a24;
+  --vp-button-brand-bg: #2f6a9a;
+  --vp-button-brand-hover-bg: #3a79ae;
+  --vp-button-brand-text: #fff;
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, #2f6a9a 30%, #8a6a24);
+}
+
+/* subtle gold accents */
+.VPNavBarTitle .title { letter-spacing: 0.04em; font-weight: 600; }
+.VPNavBarTitle .logo { border-radius: 4px; }
+.vp-doc h1 { letter-spacing: -0.01em; }
+.vp-doc h2 { border-top: 1px solid var(--vp-c-divider); }
+.vp-doc a { text-decoration: none; border-bottom: 1px solid rgba(128, 176, 216, 0.35); }
+.vp-doc a:hover { border-bottom-color: var(--vp-c-brand-1); }
+.vp-doc a.header-anchor, .vp-doc .VPBadge a { border-bottom: none; }
+.vp-doc th { background: var(--vp-c-bg-soft); }
+.vp-doc blockquote { border-left-color: var(--abyss-gold); }
+.custom-block.warning { border-color: rgba(200, 162, 90, 0.45); }
+
+/* home */
+.VPHome .VPHero .image-src { max-width: 240px; max-height: 240px; border-radius: 12px; }
+.VPFeature { border: 1px solid var(--vp-c-divider) !important; background: var(--vp-c-bg-soft) !important; transition: border-color 0.2s; }
+.VPFeature:hover { border-color: var(--abyss-steel) !important; }
+.VPFeature .title { color: var(--abyss-steel); }
+.home-notice { max-width: 720px; margin: 8px auto 0; padding: 0 24px; }
+.dark ::selection { background: rgba(200, 162, 90, 0.35); }
+
+/* the kanji watermark */
+.VPHome::after {
+  content: '刀';
+  position: fixed;
+  right: 4vw;
+  bottom: -4vh;
+  font-size: 38vh;
+  line-height: 1;
+  color: var(--abyss-steel);
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 0;
+}

@@ -1,0 +1,58 @@
+# Roadmap
+
+Abyss is in early development (**0.x**). **1.0.0** is the first usable release and the start of the distribution packages. This page lists what is planned; the order is roughly by usefulness for everyday use.
+
+::: warning Work in progress
+Nothing on this page is a promise of a date. Details may change.
+:::
+
+## Done
+
+- All ten repositories forked, renamed and building together
+- Abyssland runs as its own session
+- Abysslang: compiled C++ config with typed options, binds, rules, events, timers, submaps, `abyssctl reload` with last-good fallback
+
+## In progress
+
+- **Custom layouts** (`c.addLayout`) for your own tiling algorithms, including a grid layout
+- Cursor handling that works for games and Xwayland apps with a single config value
+- Everyday testing of the real session
+
+## Planned
+
+### Built-in bar and menus
+
+No external bar needed: a small widget system inside Abyssland lets you build a bar, launcher and power menu in C++ right in your config (workspaces, window title, clock, tray, popups, click and scroll callbacks). Third-party bars keep working through the standard protocols (`ext-workspace`, `wlr-foreign-toplevel`).
+
+### Idle and screensaver
+
+Idle handling built into Abyssland, configured in Abysslang: run actions after a period of inactivity and on resume. The screensaver is part of it: audio visualizer, black screen, color scenes, video or clock; it ends on input, optionally followed by locking and screen off.
+
+### AbyssLock
+
+Lock screen, forked from hyprlock, in the Katana look and configured in compiled C++ like the compositor.
+
+### AbyssPaper
+
+Command line wallpaper tool, forked from hyprpaper: images, GIFs and video with optional audio, plus layers on top such as clock, audio visualizer and now-playing.
+
+### More tools
+
+A color picker (AbyssPicker), a blue-light filter (AbyssDusk) and a polkit agent.
+
+### Documentation
+
+This wiki grows with the project: a generated Abysslang reference and a guide to the differences from Hyprland.
+
+### Packages and 1.0.0
+
+- Release tarballs and tagged versions
+- **Arch Linux:** AUR
+- **Fedora:** COPR
+- **Void Linux:** own xbps repository
+- **Gentoo:** own overlay
+- Later, maybe: a Nix flake and Debian/Ubuntu packages
+
+## Upstream
+
+Security and bug fixes from hyprwm are picked over selectively. Abyss does not blindly merge new Hyprland releases.
