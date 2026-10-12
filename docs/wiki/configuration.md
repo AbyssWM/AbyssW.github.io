@@ -271,12 +271,18 @@ c.idle(300, screensaver([](Canvas& g, const SaverFrame& f) {
 - `SaverFrame`: `width`, `height`, `scale`, `monitor`, `time` (seconds since it started), `now`, `audio` (bars from 0 to 1).
 - Options: `fps` (0 draws once, at most 144), `audio` (starts `cava` while the screensaver runs), `bars`, `monitors` (only these outputs, the others stay black).
 - `saver::clock()` and `saver::cava()` are plain functions in `abyss/saver.hpp` built from the same API, so they double as examples.
-- The first key or click only wakes up and never reaches a window or a bind. While the session is locked nothing is swallowed, so the lock screen gets every key.
-- The saver is drawn above windows and layers, below the lock screen. The cursor is hidden while it runs.
+- The first key or click only wakes up and never reaches a window, a bind or the lock screen.
+- The saver is drawn above everything, including the lock screen. The cursor is hidden while it runs.
+- `saver::clock()` jumps to a new spot once a minute against burn-in (`.wander = false` keeps it centered).
 - Without `cava` installed, or without audio, the bars stay quiet. The compositor keeps running if `cava` dies.
 - `abyssctl dispatch screensaver` shows it right away, for testing.
 
-Lock or screen off are separate rules: `c.idle(600, [] { exec("abysslock"); });`.
+Lock or screen off are separate rules. Lock at the same time as the saver and the lock screen is what you see after waking it up:
+
+```cpp
+c.idle(300, screensaver(saver::clock()));
+c.idle(300, [] { exec("abysslock"); });
+```
 
 ## Submaps
 
