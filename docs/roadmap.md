@@ -8,7 +8,8 @@ Nothing on this page is a promise of a date. Details may change.
 
 ## Done
 
-- All ten repositories forked, renamed and building together
+- All twelve repositories forked, renamed and building together
+- Own dialogs (`abyss-dialog`), no Hyprland packages needed at runtime
 - Abyssland runs as its own session
 - Abysslang: compiled C++ config with typed options, binds, rules, events, timers, submaps, `abyssctl reload` with last-good fallback
 - Native idle rules (`c.idle`) with inhibitor support
