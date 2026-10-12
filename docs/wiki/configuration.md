@@ -229,6 +229,24 @@ t.setEnabled(false);   // disarm
 t.cancel();            // remove
 ```
 
+## Idle
+
+`c.idle` runs a callback after a period without input (keyboard, pointer, touch, tablet) and, optionally, another one on the first input afterwards:
+
+```cpp
+c.idle(300, [] { exec("abysslock"); });                    // lock after 5 minutes
+c.idle(600, [] { exec("abyssctl dispatch dpms off"); },
+            [] { exec("abyssctl dispatch dpms on"); });    // screen off, back on with the first input
+```
+
+- Nothing is registered by default: no built-in lock, suspend or helper.
+- Active idle inhibitors (video players, browsers in fullscreen, idle-inhibit window rules) block the rule. When they go away, the whole timeout counts again.
+- `onResume` only runs after `onIdle` ran. It may be left out.
+- `seconds` must be finite, at least `0.001` and at most about `4294966`.
+- A reload drops and re-creates the rules, they never stack up.
+- Callbacks run on the compositor thread: keep them short and use `exec()` for anything slow. Exceptions are caught and logged.
+- The `forceIdle` action bypasses inhibitors, as it does for the `ext-idle-notify` protocol.
+
 ## Submaps
 
 A submap is a separate set of binds that is active until you leave it:
