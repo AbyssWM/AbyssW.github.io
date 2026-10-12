@@ -299,7 +299,33 @@ c.submap("resize", [](Config& c) {
 
 ## Gestures and permissions
 
-`c.gesture(fingers, direction, action, opts)` registers touchpad gestures. `c.permission(binary, type, mode)` sets rules such as `c.permission("/usr/bin/grim", "screencopy", "allow")` (types: `screencopy`, `cursorpos`, `keyboard`, `input-capture`; modes: `allow`, `ask`, `deny`).
+Touchpad gestures run a built-in action or your own code:
+
+```cpp
+c.gesture(3, "horizontal", "workspace");                     // built-in action
+c.gesture(3, "down", [] { exec("grim"); });                  // runs once when the fingers are lifted
+c.gesture(4, "swipe", GestureCallbacks{
+    .start  = [](const GestureEvent& e) { /* direction recognised */ },
+    .update = [](const GestureEvent& e) { /* e.delta, e.scale, e.rotation */ },
+    .finish = [](const GestureEvent& e) { /* e.cancelled */ },
+});
+```
+
+- Built-in actions: `workspace`, `move`, `resize`, `special`, `close`, `float`, `fullscreen`, `cursor_zoom`, `scroll_move`, `unset`.
+- Directions: `horizontal`, `vertical`, `left`, `right`, `up`, `down`, `swipe`, `pinch`, `pinchin`, `pinchout`.
+- `fingers` must be between 2 and 9. Options (`mods`, `scale`, `disableInhibit`) work for all three forms.
+
+Per-device settings, including tags for keyboards and pointers:
+
+```cpp
+c.device("my-touchpad", {.naturalScroll = true, .tags = "touchpad"});
+```
+
+`c.permission(binary, type, mode)` sets rules such as `c.permission("/usr/bin/grim", "screencopy", "allow")` (types: `screencopy`, `cursorpos`, `keyboard`, `input-capture`; modes: `allow`, `ask`, `deny`).
+
+::: info Touch and tablets
+All touchscreen, touchpad and tablet options are available (`c.input.touchpad`, `c.input.touchdevice`, `c.input.tablet`). They have not been tested on real touch or tablet hardware yet.
+:::
 
 ## Custom layouts
 
