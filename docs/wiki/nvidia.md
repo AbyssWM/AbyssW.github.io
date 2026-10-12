@@ -39,7 +39,7 @@ All of them default to automatic detection and normally need no change.
 | `opengl:nvidia_anti_flicker` | `true` | Waits for rendering to finish when explicit sync is not used. |
 | `render:direct_scanout` | `0` | Leave off if you see flicker in fullscreen games. |
 
-Explicit sync (`linux-drm-syncobj-v1`) is enabled automatically when the driver supports it.
+Explicit sync (`linux-drm-syncobj-v1`) is enabled automatically when the driver supports it. Do not switch it off via [protocol selection](/wiki/protocols): on NVIDIA that causes flickering.
 
 ## Two GPUs (for example AMD for the monitors, NVIDIA for CUDA or games)
 

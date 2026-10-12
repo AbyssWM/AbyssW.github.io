@@ -45,6 +45,7 @@ export default defineConfig({
           text: 'Using Abyssland',
           items: [
             { text: 'Configuration (Abysslang)', link: '/wiki/configuration' },
+            { text: 'Wayland protocols', link: '/wiki/protocols' },
             { text: 'abyssctl reference', link: '/wiki/abyssctl' }
           ]
         },

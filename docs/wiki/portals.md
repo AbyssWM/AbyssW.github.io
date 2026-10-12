@@ -10,6 +10,10 @@ Everything in Abyss can be swapped out. Abyssland offers all the standard protoc
 Abyss only tests its own portal. If you switch to another one, problems with that setup are yours to solve, not a bug in Abyss.
 :::
 
+::: tip Protocols
+Which capture protocols Abyssland offers can be chosen as well, see [Choosing Wayland protocols](/wiki/protocols). It also has a ready-made setup for wlr-only screen capture.
+:::
+
 ### xdg-desktop-portal-wlr
 
 1. Install it (Void: `xdg-desktop-portal-wlr`).

@@ -29,6 +29,7 @@ abyssctl [flags] <command> [args...|--help]
 | `version` | Abyssland version, build flags, commit and branch |
 | `status` | Internal status information |
 | `systeminfo` | System info |
+| `protocols` | List the Wayland protocols with their state (on / off / core), see [Choosing Wayland protocols](/wiki/protocols) |
 | `splash` | The current splash text |
 
 ### `reload`

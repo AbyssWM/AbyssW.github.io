@@ -183,6 +183,8 @@ c.windowRule({.cls = "^(org.pulseaudio.pavucontrol)$"},
 
 Layer surfaces (bars, launchers) use `c.layerRule(LayerMatch{.nspace = "..."}, LayerEffects{...})`.
 
+Rules return a `RuleHandle`, see [Handles](#handles).
+
 ## Monitors and workspaces
 
 ```cpp
@@ -217,9 +219,41 @@ c.on(Event::WindowOpen, [](PHLWINDOW w) { /* a window was mapped */ });
 c.on(Event::WorkspaceActive, [] { /* ... */ });
 ```
 
-Available events: `Start`, `Shutdown`, `WindowOpen`, `WindowOpenEarly`, `WindowClose`, `WindowActive`, `WindowUrgent`, `WindowTitle`, `WindowClass`, `WindowPin`, `WindowFullscreen`, `WindowFloating`, `WindowUpdateRules`, `WindowMoveToWorkspace`, `LayerOpened`, `LayerClosed`, `MonitorAdded`, `MonitorRemoved`, `MonitorFocused`, `MonitorLayoutChanged`, `WorkspaceActive`, `WorkspaceSpecialActive`, `WorkspaceCreated`, `WorkspaceRemoved`, `WorkspaceMoveToMonitor`, `ConfigReloaded`, `PropsRefreshed`, `Submap`, `ScreenshareState`, `KeyboardKey`.
+Available events: `Start`, `Shutdown`, `WindowOpen`, `WindowOpenEarly`, `WindowClose`, `WindowDestroy`, `WindowKill`, `WindowActive`, `WindowUrgent`, `WindowTitle`, `WindowClass`, `WindowPin`, `WindowFullscreen`, `WindowFloating`, `WindowUpdateRules`, `WindowMoveToWorkspace`, `LayerOpened`, `LayerClosed`, `MonitorAdded`, `MonitorRemoved`, `MonitorFocused`, `MonitorLayoutChanged`, `WorkspaceActive`, `WorkspaceSpecialActive`, `WorkspaceCreated`, `WorkspaceRemoved`, `WorkspaceMoveToMonitor`, `ConfigReloaded`, `PropsRefreshed`, `Submap`, `ScreenshareState`, `KeyboardKey`.
 
-`c.on` returns an `EventHandle`; `cancel()` removes the listener early.
+`WindowDestroy` fires while the window object is being destroyed and hands you a `PHLWINDOWREF` that may already be expired, so check `w.lock()` before using it; use `WindowClose` when you need a still valid window. `WindowKill` fires just before click-to-kill (the `kill` dispatcher, then a click on a window) sends SIGKILL to the window's process.
+
+```cpp
+c.on(Event::WindowDestroy, [](PHLWINDOWREF w) {
+    if (auto win = w.lock())
+        notify(windowTitle(win));
+});
+c.on(Event::WindowKill, [](PHLWINDOW w) { notify("killing " + windowTitle(w)); });
+```
+
+`c.on` returns an `EventHandle`; `cancel()` removes the listener early and `isActive()` tells whether it still is registered (false after `cancel()` or once a reload dropped it).
+
+## Reading state
+
+Everything you could read in Hyprland's Lua API is available as plain functions (`abyss/query.hpp`). Missing objects come back as null handles, empty lists or `std::nullopt`; every accessor accepts a null handle.
+
+```cpp
+c.bind(SUPER, "I", [] {
+    for (auto& w : windows({.workspace = activeWorkspace(monitorAtCursor()), .floating = true}))
+        notify(windowTitle(w));
+});
+```
+
+| Area | Functions |
+|---|---|
+| Lookups | `windows(WindowFilter)`, `urgentWindow()`, `lastWindow()`, `workspaceWindows(ws)`, `workspaceBySelector("name:web")`, `activeWorkspace(monitor)`, `activeSpecialWorkspace()`, `lastWorkspace()`, `monitorBySelector("DP-1")`, `monitorAt(x, y)`, `monitorAtCursor()`, `layers(LayerFilter)`, `cursorPos()`, `currentSubmap()`, `isKeyDown("Shift_L")`, `version()` |
+| Window | `windowMapped`, `windowHidden`, `windowVisible`, `windowAt`, `windowSize`, `windowWorkspace`, `windowMonitor`, `windowInitialTitle`, `windowXwayland`, `windowPinned`, `windowFullscreenModes`, `windowGroup`, `windowTags`, `windowSwallowing`, `windowInhibitingIdle`, `windowXdgTag`, `windowContentType`, `windowStableId`, `windowActive`, `windowLayoutInfo`, … |
+| Monitor | `monitorId`, `monitorDescription`, `monitorSize`, `monitorRefreshRate`, `monitorPosition`, `monitorScale`, `monitorTransform`, `monitorActiveWorkspace`, `monitorDpms`, `monitorVrrActive`, `monitorAvailableModes`, `monitorReserved`, `monitorSetWorkspace(m, "3")`, `monitorSetSpecialWorkspace(m, "special:term")`, … |
+| Workspace | `workspaceMonitor`, `workspaceVisible`, `workspaceSpecial`, `workspaceHasUrgent`, `workspaceHasFullscreen`, `workspaceEmpty`, `workspaceTiledLayout`, `workspaceLastWindow`, `workspaceGroups`, … |
+| Layer | `layerNamespace`, `layerGeometry`, `layerPid`, `layerMonitor`, `layerLayer`, `layerInteractivity`, … |
+| Group | `groupSize`, `groupCurrent`, `groupCurrentIndex` (1-based), `groupMembers`, `groupLocked`, `groupAdd(g, w)`, `groupRemove(g, w)` |
+
+The full list with comments is in `include/abyss/query.hpp`.
 
 ## Timers
 
@@ -227,6 +261,65 @@ Available events: `Start`, `Shutdown`, `WindowOpen`, `WindowOpenEarly`, `WindowC
 auto t = c.timer(60'000, [] { notify("one minute passed"); }, /*repeat=*/true);
 t.setEnabled(false);   // disarm
 t.cancel();            // remove
+```
+
+The full signature is `c.timer(ms, fn, repeat = false, enabled = true)`. With `enabled = false` the timer is created disarmed and starts when you call `setEnabled(true)` or `setTimeout(ms)`. See [Handles](#handles).
+
+## Handles
+
+Binds, rules, timers and event listeners return a small handle you can keep (in a variable, a lambda capture or a global) to switch the thing later without a reload. A reload drops every bind, rule, timer and listener, which invalidates all handles: query them again from the new `configure()`.
+
+| Handle | From | Methods |
+|---|---|---|
+| `BindHandle` | `c.bind` | `setEnabled(bool)`, `isEnabled()`, `remove()` |
+| `RuleHandle` | `c.windowRule`, `c.layerRule`, `c.workspaceRule` | `setEnabled(bool)`, `isEnabled()` |
+| `TimerHandle` | `c.timer` | `setEnabled(bool)`, `isEnabled()`, `setTimeout(int ms)`, `cancel()` |
+| `EventHandle` | `c.on` | `isActive()`, `cancel()` |
+
+### Binds
+
+A disabled bind stays registered but does not trigger. `remove()` unregisters exactly this bind (other binds on the same key stay) and the handle is dead afterwards. `isEnabled()` is false for a removed or reload-dropped bind.
+
+```cpp
+auto b = c.bind(SUPER, "G", [] { return exec("steam"); });
+b.setEnabled(false);
+bool on = b.isEnabled();   // false
+b.remove();
+```
+
+### Rules
+
+`c.windowRule`, `c.layerRule` and `c.workspaceRule` return a `RuleHandle`. A disabled rule stays registered but is ignored. Switching it applies the rules to the existing windows, layers or workspaces right away.
+
+- `windowRule(match, effects, name = "", enabled = true)` and `layerRule(match, effects, name = "", enabled = true)`: a call with a name that was already used in this config load updates that rule (match properties and effects are added, `enabled` is set again). Without a name every call adds a new rule. `enabled = false` registers or switches the rule disabled.
+- `workspaceRule(workspace, rule)`: set `rule.enabled = false` (`WorkspaceRule::enabled`) to register it disabled. An enabled rule for the same workspace string is merged into instead of adding a new one, so a disabled rule is only created when none is enabled yet; otherwise switch it with the handle.
+
+```cpp
+auto r = c.windowRule({.cls = "^(kitty)$"}, {.opacity = "0.8"}, "kitty-opacity", /*enabled=*/false);
+
+c.bind(SUPER, "O", [r] { r.setEnabled(!r.isEnabled()); });
+```
+
+`isEnabled()` is false when the rule is gone (after a reload).
+
+### Timers
+
+`TimerHandle::isEnabled()` means armed: a oneshot timer is not enabled any more after it fired, and a cancelled or reload-dropped timer never is. `setEnabled(true)` re-arms with the original interval, `setTimeout(ms)` sets a new interval (at least 1 ms) and arms the timer to fire after it; for a repeating timer the new interval is kept.
+
+```cpp
+auto t = c.timer(5000, [] { notify("still here"); }, /*repeat=*/true, /*enabled=*/false);
+t.setTimeout(30'000);      // armed now, fires every 30 s
+```
+
+### Events
+
+`EventHandle::isActive()` is false after `cancel()` or once a reload dropped the listener, also on copies of the handle.
+
+```cpp
+auto h = c.on(Event::WindowOpen, [](PHLWINDOW w) { notify(windowTitle(w)); });
+// later
+if (h.isActive())
+    h.cancel();
 ```
 
 ## Idle
