@@ -10,7 +10,7 @@ The code paths are identical to upstream Hyprland 0.56.2, but Abyss itself has n
 
 | Generation | Driver | Notes |
 |---|---|---|
-| RTX 50 (Blackwell) | 595, **open kernel modules** | NVIDIA ships Blackwell support only in the open modules. Some distributions (Void, for example) only package the proprietary ones, so you may have to install the open modules yourself. |
+| RTX 50 (Blackwell) | 595, **open kernel modules** | NVIDIA ships Blackwell support only in the open modules. Check which modules your distribution packages: Void, for example, switched its `nvidia` package to the open modules with 595 (older GPUs use `nvidia580`). |
 | RTX 40, 30, 20, GTX 16 | 595 (proprietary or open modules) | |
 | GTX 10 and older | older driver branches | Not targeted. |
 
