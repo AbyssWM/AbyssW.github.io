@@ -59,6 +59,31 @@ An option can also be set by its string name with the same checks: `c.set("gener
 
 Per-device settings use `c.device(name, {...})`, for example `c.device("logitech-mx-master", {.sensitivity = -0.5});`.
 
+## Reading options
+
+`abyss::getOption(name)` returns the current value of any option by its string name, the counterpart of `hl.get_config` in Hyprland's Lua API. `abyss::get<T>(name)` reads it typed. Both return `std::optional`, empty when the option does not exist.
+
+```cpp
+c.bind(SUPER, "G", [] {
+    auto gaps  = get<int>("general:gaps_in");            // std::optional<int>
+    auto blur  = get<bool>("decoration:blur:enabled");
+    auto layout = get<std::string>("general:layout");
+    if (gaps && *gaps < 20)
+        set("general:gaps_in", *gaps + 5);
+    return ok();
+});
+```
+
+`T` can be a number (`int`, `float`, `double`, ...), `bool`, `std::string`, `Vec2` or `Gap`. Numbers and `bool` convert into each other, and anything converts to `std::string`. A `Gap` whose four sides are equal reads as a plain number. If the type does not fit (for example `Vec2` on an integer option), the result is empty. Other complex values come back as their config string: a gradient is a `std::string`, while colors are returned as an `int`.
+
+`getOption(name)` returns a `std::variant` of `bool`, `int64_t`, `double`, `std::string`, `Vec2` and `Gap`.
+
+`abyss::optionSetByUser(name)` is true when the config (or `set()`) changed the option and false while it still has its default or does not exist.
+
+::: warning
+Typed fields such as `c.general.gaps_in = 5` are only applied after `configure()` returned. Reading an option inside `configure()` therefore still shows the old value. Read options in callbacks, binds, timers and event listeners instead.
+:::
+
 ## Cursor theme and size
 
 Set the theme and logical size in one place:
@@ -152,18 +177,57 @@ Actions are values. Pass them to `bind()` or run them from your own code with `r
 | Area | Actions |
 |---|---|
 | Session | `exit()` |
-| Windows | `killActive()`, `forceKillActive()`, `closeWindow()`, `killWindow()`, `signal()`, `toggleFloating()`, `setFloating()`, `setTiled()`, `pseudo()`, `pin()`, `fullscreen()`, `fullscreenState()`, `centerWindow()`, `setProp()`, `tag()`, `toggleSwallow()` |
+| Windows | `killActive()`, `forceKillActive()`, `closeWindow()`, `killWindow()`, `signal()`, `toggleFloating()`, `setFloating()`, `setTiled()`, `pseudo()`, `pin()`, `fullscreen()`, `fullscreenState()`, `centerWindow()`, `setProp()`, `tag()`, `clearTags()`, `signalWindow()`, `toggleSwallow()` |
 | Focus and movement | `moveFocus(Dir)`, `moveWindow(Dir)`, `moveWindowToMonitor()`, `swapWindow(Dir)`, `swapWith()`, `swapNext()`, `cycleNext()`, `focusWindow()`, `focusUrgentOrLast()`, `focusCurrentOrLast()`, `alterZOrder()` |
 | Size and position | `resizeActive(dx, dy)`, `moveActive(dx, dy)`, `resizeWindowPixel()`, `moveWindowPixel()`, `mouseMove()`, `mouseResize()` |
-| Groups | `toggleGroup()`, `changeGroupActive()`, `moveGroupWindow()`, `moveIntoGroup()`, `moveIntoOrCreateGroup()`, `moveOutOfGroup()`, `lockGroups()`, `lockActiveGroup()`, `denyWindowFromGroup()` |
-| Workspaces and monitors | `workspace()`, `moveToWorkspace()`, `toggleSpecial()`, `moveToSpecial()`, `renameWorkspace()`, `focusMonitor()`, `focusWorkspaceOnCurrentMonitor()`, `moveCurrentWorkspaceToMonitor()`, `moveWorkspaceToMonitor()`, `swapActiveWorkspaces()`, `dpms()` |
+| Groups | `toggleGroup()`, `changeGroupActive()`, `moveGroupWindow()`, `moveIntoGroup()`, `moveIntoOrCreateGroup()`, `moveOutOfGroup()`, `setGroupActive()`, `lockGroups()`, `lockActiveGroup()`, `denyWindowFromGroup()` |
+| Workspaces and monitors | `workspace()`, `moveToWorkspace()`, `toggleSpecial()`, `moveToSpecial()`, `renameWorkspace()`, `changeWorkspaceId()`, `focusMonitor()`, `focusWorkspaceOnCurrentMonitor()`, `moveCurrentWorkspaceToMonitor()`, `moveWorkspaceToMonitor()`, `swapActiveWorkspaces()`, `dpms()` |
 | Layout | `setLayout()`, `layoutMsg()`, `toggleSplit()`, `swapSplit()` |
-| Misc | `submap()`, `pass()`, `sendShortcut()`, `sendKeyState()`, `global()`, `event()`, `moveCursor()`, `moveCursorToCorner()`, `forceRendererReload()`, `forceIdle()`, `releaseInputCapture()`, `dispatch(name, arg)` |
-| Helpers | `notify(text, ms, color, icon)`, `ok()`, `error(msg)` |
+| Misc | `submap()`, `pass()`, `sendShortcut()`, `sendKeyState()`, `global()`, `event()`, `moveCursor()`, `moveCursorToCorner()`, `forceRendererReload()`, `forceIdle()`, `releaseInputCapture()`, `noop()`, `dispatch(name, arg)` |
+| Helpers | `notify()`, `notifications()`, `dismissNotifications()`, `print()`, `log()`, `clearCrashedLockscreen()`, `execScheduledPropRefreshImmediately()`, `ok()`, `error(msg)` |
 
 `exec(command)` is immediate and returns `SDispatchResult`. Dispatcher actions such as `killActive()` are deferred; utilities such as `notify`, `ok` and `error` run immediately. `spawn` and `spawnRaw` are not public config functions.
 
 `dispatch(name, arg)` creates an action for any dispatcher by name, see [abyssctl](/wiki/abyssctl).
+
+### Window selectors
+
+Many window actions take an optional `selector` as their last parameter: `moveWindow`, `moveWindowOrGroup`, `swapWindow`, `swapNext`, `centerWindow`, `toggleGroup`, `changeGroupActive`, `moveIntoGroup`, `moveIntoOrCreateGroup`, `moveOutOfGroup` and `moveCursorToCorner` (new), next to the ones that already had one (`closeWindow`, `killWindow`, `signalWindow`, `toggleFloating`, `tag`, `clearTags`, `setGroupActive`, `fullscreen`, `moveToWorkspace`, ...).
+
+```cpp
+c.bind(SUPER, "K", moveWindow(Dir::Left, false, "class:^(kitty)$"));   // silent = false, then the selector
+c.bind(SUPER, "J", centerWindow("title:^(Notes)$"));
+c.bind(SUPER, "M", moveIntoGroup(Dir::Right, "tag:work"));
+c.bind(SUPER, "F", fullscreen(0, "set", /*layoutAware=*/false, "initialclass:^(mpv)$"));
+```
+
+Without a selector (or with `""`) these stay plain dispatchers and act on the focused window. With one, the window is resolved when the action runs. A selector that matches no window is an error, never a silent fallback to the focused window.
+
+| Selector | Matches |
+|---|---|
+| `class:<regex>` | the window class |
+| `initialclass:<regex>` | the class at map time |
+| `title:<regex>` | the window title |
+| `initialtitle:<regex>` | the title at map time |
+| `tag:<name>` | windows with this tag |
+| `address:0x...` | exactly one window, as printed by `abyssctl` or `byAddress(w)` |
+| `pid:<n>` | windows of this process |
+| `floating` / `tiled` | all floating or all tiled windows |
+
+The regex has to match the whole string, so use `class:^(kitty)$` or `class:.*kitty.*`, not a bare `class:kitty` for a partial match. A string without one of these prefixes matches nothing.
+
+String literals convert to `bool` before they become a `std::string`. `moveWindow(Dir::Left, "class:x")` would therefore have silently meant `silent = true` with no selector. These overloads are deleted and are a compile error now: `moveWindow(Dir, const char*)`, `moveWindowToMonitor(std::string, const char*)`, `swapNext(const char*)`, `cycleNext(const char*)` and `cycleNext(bool, const char*)`, `moveToWorkspace(int / std::string, const char*)`, `changeGroupActive(const char*)` and `fullscreen(int, const char*, const char*)`. Pass the `bool` explicitly, as in the example above.
+
+New actions in this area:
+
+| Action | Effect |
+|---|---|
+| `clearTags(selector = "")` | removes every tag, including the dynamic ones from rules |
+| `signalWindow(sig, selector = "")` | sends a signal to the process of the window |
+| `setGroupActive(index, selector = "")` | makes the index-th window of the group active (1-based, `0` = last) |
+| `changeWorkspaceId(from, to)` | gives workspace `from` the id `to`, fails if `to` exists |
+| `noop()` | does nothing, a bind that only swallows the key |
+| `fullscreen(mode, state, layoutAware, selector = "")` | `mode` 0 = fullscreen, 1 = maximize; `state` is `"toggle"`, `"set"` or `"unset"`; with `layoutAware = false` the layout is not told and the window just covers the monitor |
 
 ## Window and layer rules
 
@@ -232,6 +296,51 @@ c.on(Event::WindowKill, [](PHLWINDOW w) { notify("killing " + windowTitle(w)); }
 ```
 
 `c.on` returns an `EventHandle`; `cancel()` removes the listener early and `isActive()` tells whether it still is registered (false after `cancel()` or once a reload dropped it).
+
+## Notifications
+
+`notify(text, ms = 5000, color = std::nullopt, icon = "info")` shows a notification. The second form takes options and is the one to use for the font size:
+
+```cpp
+auto n = notify("building...", NotifyOpts{.ms = 10000, .icon = "hint", .fontSize = 16.f});
+```
+
+`NotifyOpts` has `ms` (default 5000), `color` (optional, default is the icon's color), `icon` (`info`, `warning`, `error`, `hint`, `ok`, `confused` or `none`) and `fontSize` (default 13).
+
+Both return a `NotificationHandle`. It is copyable and every call does nothing once the notification is gone, so a stale handle is safe to keep.
+
+| Member | Effect |
+|---|---|
+| `alive()` | false once timed out or dismissed |
+| `text()` / `setText(text)` | read or replace the text |
+| `setColor(color)`, `setIcon(icon)`, `setFontSize(size)` | restyle it |
+| `setTimeout(ms)` | restarts the countdown with a new duration |
+| `pause()` / `resume()` | stop or restart the countdown, calls must be balanced |
+| `dismiss()` | removes it |
+
+```cpp
+auto progress = std::make_shared<NotificationHandle>();
+c.bind(SUPER, "P", [progress] {
+    if (progress->alive())
+        progress->setText("still running");
+    else
+        *progress = notify("started", NotifyOpts{.ms = 60'000});
+    return ok();
+});
+```
+
+`notifications()` lists every notification that is shown, oldest first. `dismissNotifications(n)` removes the oldest `n`, with no argument or `-1` it removes all.
+
+## Logging and small helpers
+
+- `abyss::print(fmt, args...)` and `abyss::log(LogLevel, text)` write `[abyss] text` into the compositor log (`abyssctl rollinglog`), like `print()` in the Lua API. `print` uses `std::format` syntax and the `Info` level; `log` takes `Trace`, `Debug`, `Info`, `Warn` or `Error`. Nothing is written while `debug:disable_logs` is on, which is the default, so set `c.debug.disable_logs = false` while you debug.
+- `clearCrashedLockscreen()` unlocks the session when the lock screen client crashed and the session stays locked behind a red screen. It refuses while a working lock screen holds the lock. It runs immediately and is deliberately not a dispatcher, so other local processes cannot call it.
+- `execScheduledPropRefreshImmediately()` applies window rule and property changes from `set()` now instead of on the next loop iteration. It returns `false` if nothing was pending.
+
+```cpp
+c.debug.disable_logs = false;
+c.bind(SUPER, "L", [] { print("active gaps: {}", get<int>("general:gaps_in").value_or(-1)); return ok(); });
+```
 
 ## Reading state
 
