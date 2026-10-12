@@ -247,6 +247,37 @@ c.idle(600, [] { exec("abyssctl dispatch dpms off"); },
 - Callbacks run on the compositor thread: keep them short and use `exec()` for anything slow. Exceptions are caught and logged.
 - The `forceIdle` action bypasses inhibitors, as it does for the `ext-idle-notify` protocol.
 
+## Screensaver
+
+The screensaver is part of idle. Pass `screensaver(...)` instead of the two callbacks:
+
+```cpp
+c.idle(300, screensaver(saver::clock()));                                   // big clock with date
+c.idle(300, screensaver(saver::cava({.bars = 64, .color = 0x80b0d8})));    // audio bars
+```
+
+Everything else you draw yourself. The callback runs once per monitor and frame while the screensaver is shown:
+
+```cpp
+c.idle(300, screensaver([](Canvas& g, const SaverFrame& f) {
+    g.clear(0x050816);
+    g.text(f.width / 2, f.height / 2, "刀", {.size = 200, .color = 0xc8a25a, .align = Align::Center});
+    for (size_t i = 0; i < f.audio.size(); ++i)                               // only with .audio = true
+        g.rect(i * f.width / f.audio.size(), f.height, 8, -f.audio[i] * 200, 0x80b0d8);
+}, {.fps = 30, .audio = true, .bars = 64}));
+```
+
+- `Canvas`: `clear`, `rect`, `roundRect`, `line`, `circle`, `text`, `textSize`, `image` (PNG) and `cairo()` for raw cairo. Colors are `0xRRGGBB` with an optional alpha, coordinates are logical pixels.
+- `SaverFrame`: `width`, `height`, `scale`, `monitor`, `time` (seconds since it started), `now`, `audio` (bars from 0 to 1).
+- Options: `fps` (0 draws once, at most 144), `audio` (starts `cava` while the screensaver runs), `bars`, `monitors` (only these outputs, the others stay black).
+- `saver::clock()` and `saver::cava()` are plain functions in `abyss/saver.hpp` built from the same API, so they double as examples.
+- The first key or click only wakes up and never reaches a window or a bind. While the session is locked nothing is swallowed, so the lock screen gets every key.
+- The saver is drawn above windows and layers, below the lock screen. The cursor is hidden while it runs.
+- Without `cava` installed, or without audio, the bars stay quiet. The compositor keeps running if `cava` dies.
+- `abyssctl dispatch screensaver` shows it right away, for testing.
+
+Lock or screen off are separate rules: `c.idle(600, [] { exec("abysslock"); });`.
+
 ## Submaps
 
 A submap is a separate set of binds that is active until you leave it:
