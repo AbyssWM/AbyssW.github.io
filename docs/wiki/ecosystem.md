@@ -16,6 +16,8 @@ Abyss forks the whole Hyprland stack from [hyprwm](https://github.com/hyprwm), r
 | [Xdg-desktop-portal-abyss](https://github.com/AbyssWM/Xdg-desktop-portal-abyss) | Desktop portal (screen sharing, ...) | [xdg-desktop-portal-hyprland](https://github.com/hyprwm/xdg-desktop-portal-hyprland) | 1.4.1 |
 | [Abysstoolkit](https://github.com/AbyssWM/Abysstoolkit) | GUI toolkit for the Abyss tools | [hyprtoolkit](https://github.com/hyprwm/hyprtoolkit) | 0.5.4 |
 | [Abyss-guiutils](https://github.com/AbyssWM/Abyss-guiutils) | Dialogs (`abyss-dialog`), run prompt, welcome and update screens | [hyprland-guiutils](https://github.com/hyprwm/hyprland-guiutils) | 0.2.2 |
+| [AbyssDusk](https://github.com/AbyssWM/AbyssDusk) | Blue light filter (`abyssdusk`) | [hyprsunset](https://github.com/hyprwm/hyprsunset) | 0.4.0 |
+| [AbyssPicker](https://github.com/AbyssWM/AbyssPicker) | Color picker (`abysspicker`) | [hyprpicker](https://github.com/hyprwm/hyprpicker) | 0.4.7 |
 
 "Version" is the upstream release each fork started from. Abyss itself is versioned separately: 0.x during development, **1.0.0** as the first usable release.
 
@@ -23,6 +25,6 @@ Abyss forks the whole Hyprland stack from [hyprwm](https://github.com/hyprwm), r
 
 Abyss does not pretend to be Hyprland: environment variables are `ABYSSLAND_*`, sockets live in `$XDG_RUNTIME_DIR/abyss`, protocols are called `abyssland_*`, `XDG_CURRENT_DESKTOP` is `Abyssland` and the control tool is `abyssctl`. Lua configs and plugins are removed; configuration is [Abysslang](/wiki/configuration).
 
-## Planned tools
+## Tools
 
-See the [Roadmap](/roadmap) for the lock screen, wallpaper tool and more.
+How to use AbyssDusk and AbyssPicker: [Tools](/wiki/tools). See the [Roadmap](/roadmap) for the lock screen, wallpaper tool and more.

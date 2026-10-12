@@ -15,6 +15,7 @@ Nothing on this page is a promise of a date. Details may change.
 - Native idle rules (`c.idle`) with inhibitor support
 - Screensaver in idle: draw your own in C++, clock and audio-visualizer presets included
 - Bundled wallpapers drawn by the compositor, no wallpaper app needed
+- **AbyssDusk** (blue light filter) and **AbyssPicker** (color picker) are available, see [Tools](/wiki/tools)
 
 ## In progress
 
@@ -38,7 +39,7 @@ Command line wallpaper tool, forked from hyprpaper: images, GIFs and video with 
 
 ### More tools
 
-A color picker (AbyssPicker), a blue-light filter (AbyssDusk) and a polkit agent.
+A polkit agent. The color picker (AbyssPicker) and the blue-light filter (AbyssDusk) already exist, see [Tools](/wiki/tools).
 
 ### Documentation
 
