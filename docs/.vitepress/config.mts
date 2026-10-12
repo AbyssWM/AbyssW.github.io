@@ -46,7 +46,8 @@ export default defineConfig({
           items: [
             { text: 'Configuration (Abysslang)', link: '/wiki/configuration' },
             { text: 'Wayland protocols', link: '/wiki/protocols' },
-            { text: 'abyssctl reference', link: '/wiki/abyssctl' }
+            { text: 'abyssctl reference', link: '/wiki/abyssctl' },
+            { text: 'Patching and replacing', link: '/wiki/patching' }
           ]
         },
         {

@@ -31,6 +31,8 @@ abyssctl [flags] <command> [args...|--help]
 | `systeminfo` | System info |
 | `protocols` | List the Wayland protocols with their state (on / off / core), see [Choosing Wayland protocols](/wiki/protocols) |
 | `splash` | The current splash text |
+| `doctor` | Read-only overview of what differs from the defaults, see [below](#doctor) |
+| `run [name] [args...]` | Call a command registered with `c.command`; without a name, list them, see [below](#run) |
 
 ### `reload`
 
@@ -43,6 +45,36 @@ Abyssland's config is C++ compiled into the binary. `abyssctl reload`:
 `--no-build` only re-applies the already compiled config in place. `--dry-run` builds but neither installs nor restarts.
 
 Environment: `ABYSS_SOURCE_DIR` and `ABYSS_BUILD_DIR` override the compiled-in directories, `ABYSS_PREFIX` overrides the install prefix.
+
+### `doctor`
+
+Read-only. Shows what differs from the default setup, so a problem report (or your own debugging) starts from the facts. A deviation is reported as `modified`, never as an error: [replacing things is allowed](/wiki/patching) and is your responsibility.
+
+```sh
+abyssctl doctor        # text
+abyssctl -j doctor     # JSON: instance, reachable, modified, warnings, checks[]
+```
+
+| Section | Checks |
+|---|---|
+| `version` | build and instance commit, uncommitted changes or commits not on origin, abyssctl and instance from different commits |
+| `portals` | `XDG_CURRENT_DESKTOP` contains `Abyssland`, which `portals.conf` wins |
+| `env` | `ABYSSAL_*`, `ABYSSLAND_*`, `ABYSSCURSOR_*`, `ABYSS_SOURCE_DIR`, `ABYSS_BUILD_DIR`, `ABYSS_PREFIX` overrides and the helper programs in `PATH` |
+| `config` | `config.hpp` compared with `config.def.hpp`, `Abyssland.last-good` present |
+| `protocols` | protocols that are disabled |
+
+Status per section: `ok` (default), `modified` (deviates from the default), `WARNING` (something looks wrong, for example a missing `Abyssland` token or `last-good`) and `info` (for example no running instance). Without a running instance only the local checks run.
+
+### `run`
+
+Calls a command from your config (`c.command`, see [Patching and replacing](/wiki/patching#commands-and-user-events)).
+
+```sh
+abyssctl run              # list the registered commands
+abyssctl run gaps 8       # the reply of the command, "ok" if it is empty
+```
+
+An exception in the command is returned as the error text. Everything after the name is passed to the command unchanged, also arguments that look like `abyssctl` flags.
 
 ## Querying state
 

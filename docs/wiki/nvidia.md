@@ -57,6 +57,15 @@ if (std::filesystem::exists("/dev/dri/amd-gpu"))
 SUBSYSTEM=="drm", KERNEL=="card*", ATTRS{vendor}=="0x1002", SYMLINK+="dri/amd-gpu"
 ```
 
+The same, typed, with `c.gpu` (no udev rule needed; devices that do not exist on a machine are skipped, so the config also works elsewhere):
+
+```cpp
+// render only on the AMD card, the NVIDIA card stays free for CUDA
+c.gpu.devices = {"/dev/dri/by-path/pci-0000:0b:00.0-card"};
+```
+
+`c.gpu.noModifiers`, `noExplicitMgpu`, `noAtomic` and `eglNoModifiers` set the other variables of the table below. They are read at start; a reload only warns. See [Patching and replacing](/wiki/patching#gpu-options-c-gpu).
+
 `ABYSSAL_DRM_DEVICES` takes a colon-separated list; the first device is the primary one. Paths are resolved, so `/dev/dri/by-path/...` links work too. Start games on the NVIDIA card with PRIME offload (`prime-run %command%` in Steam).
 
 ## Environment variables (Hyprland → Abyss)
@@ -71,4 +80,4 @@ SUBSYSTEM=="drm", KERNEL=="card*", ATTRS{vendor}=="0x1002", SYMLINK+="dri/amd-gp
 | `AQ_TRACE` | `ABYSSAL_TRACE` |
 | `HYPRLAND_EGL_NO_MODIFIERS` | `ABYSSLAND_EGL_NO_MODIFIERS` |
 
-Variables that belong to the NVIDIA driver or to applications (`LIBVA_DRIVER_NAME`, `__GLX_VENDOR_LIBRARY_NAME`, `GBM_BACKEND`, `__GL_*`) keep their names. Set them with `c.env(...)`; the config runs before the GPU backend starts.
+Variables that belong to the NVIDIA driver or to applications (`LIBVA_DRIVER_NAME`, `__GLX_VENDOR_LIBRARY_NAME`, `GBM_BACKEND`, `__GL_*`) keep their names. Set them with `c.env(...)`; the `ABYSSAL_*` ones also have a typed form, `c.gpu`. The config runs before the GPU backend starts.

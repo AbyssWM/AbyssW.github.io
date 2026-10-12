@@ -171,3 +171,7 @@ Each protocol is listed with its state: `on`, `off`, or `not-created` (enabled, 
 | `xwayland_shell_v1` | Xwayland: X11 windows cannot be mapped without it |
 | `vicinae_hotkey_manager_v1` | vicinae launcher hotkeys |
 | `wl_drm` | legacy Mesa buffer sharing; only offered together with dmabuf |
+
+## Contract test
+
+`tests/nested/protocol-contract.sh [--default-config] <Abyssland binary>` in the Abyssland repository starts a binary nested and checks that the globals match what `abyssctl -j protocols` promises: every enabled protocol is offered (with its version limit), every disabled one is missing, and every offered global can be switched off. With `--default-config` it also checks that the protocols the portals need are on. It needs a running parent Wayland session, see `tests/nested/README.md` there.
