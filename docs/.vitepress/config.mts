@@ -37,7 +37,8 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/wiki/' },
             { text: 'Getting started', link: '/wiki/getting-started' },
-            { text: 'NVIDIA', link: '/wiki/nvidia' }
+            { text: 'NVIDIA', link: '/wiki/nvidia' },
+            { text: 'Desktop portals', link: '/wiki/portals' }
           ]
         },
         {
