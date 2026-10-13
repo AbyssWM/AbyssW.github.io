@@ -2,8 +2,8 @@
 
 NVIDIA support is a priority for Abyss. Abyssland keeps all of Hyprland's NVIDIA handling unchanged: driver detection, explicit sync, the atomic commit workarounds, multi-GPU blitting and the cursor fallbacks.
 
-::: warning Not yet tested on real hardware
-The code paths are identical to upstream Hyprland 0.56.2, but Abyss itself has not run on an NVIDIA card yet. Reports are welcome.
+::: warning Partly tested
+Abyssland runs nested (as a window inside another compositor) on an RTX 4090 with driver 595 and the open kernel modules: EGL and dmabuf clients, XWayland, VA-API video playback through `nvidia-vaapi-driver` and screencopy all work. A full session directly on the card (KMS, atomic commits, hardware cursor, explicit sync to the display) is not tested yet. The code paths are identical to upstream Hyprland 0.56.2. Reports are welcome.
 :::
 
 ## Supported cards
