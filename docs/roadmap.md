@@ -6,9 +6,9 @@ Abyss is in early development (**0.x**). **1.0.0** is the first usable release a
 Nothing on this page is a promise of a date. Details may change.
 :::
 
-## Done
+## Current implementation
 
-- All twelve repositories forked, renamed and building together
+- Seventeen code repositories forked and renamed; builds and tests are being checked per repository
 - Own dialogs (`abyss-dialog`), no Hyprland packages needed at runtime
 - Abyssland runs as its own session
 - Abysslang: compiled C++ config with typed options, binds, rules, events, timers, submaps, `abyssctl reload` with last-good fallback
@@ -17,29 +17,37 @@ Nothing on this page is a promise of a date. Details may change.
 - Bundled wallpapers drawn by the compositor, no wallpaper app needed
 - **AbyssDusk** (blue light filter) and **AbyssPicker** (color picker) are available, see [Tools](/wiki/tools)
 
-## In progress
+## Verification and integration
 
-- **Custom layouts** (`c.addLayout`) for your own tiling algorithms, including a grid layout
-- Cursor handling that works for games and Xwayland apps with a single config value
+- **Custom layouts** (`c.addLayout`) and typed cursor options exist; game and Xwayland behavior still need real-session coverage
+- Full code reviews across the ecosystem, including callers of renamed APIs
+- Reliable builds and tests: successful dependency builds do not prove that every companion application builds or works
+- Portal desktop detection, capture failures, selection and restore behavior
 - Everyday testing of the real session
 
 ## Planned
 
-### Built-in bar and menus
+### Shared configuration
 
-No external bar needed: a small widget system inside Abyssland lets you build a bar, launcher and power menu in C++ right in your config (workspaces, window title, clock, tray, popups, click and scroll callbacks). Third-party bars keep working through the standard protocols (`ext-workspace`, `wlr-foreign-toplevel`).
+The target is C++-based configuration for configurable Abyss applications under `$XDG_CONFIG_HOME/abyss` (normally `~/.config/abyss`). Freely named files select their application with a custom leading directive such as `#include.abyss <paper>`. Multiple files and ordinary includes must work, with useful type errors and rebuild dependencies.
+
+The current preprocessor is a limited prototype. Generated values are not yet a complete, applied configuration API for the companion tools. Their existing settings remain documented until each migration is implemented and tested. The compositor's existing C++ configuration is a separate working path.
+
+### Personal bar and menus
+
+The personal bar, menus and desktop layout will be configured during real-session testing. They are not an additional implementation milestone in this roadmap. Third-party shells use the compositor's available protocols and IPC.
 
 ### AbyssLock
 
-Lock screen, forked from hyprlock, in the Katana look and configured in compiled C++ like the compositor.
+The lock-screen application exists. Its configuration still uses the parser-based format; migration to the shared C++ system and lock/suspend/failure testing remain open.
 
 ### AbyssPaper
 
-Command line wallpaper tool, forked from hyprpaper: images, GIFs and video with optional audio, plus layers on top such as clock, audio visualizer and now-playing.
+The image wallpaper application exists. Video/GIF/audio code and a configuration prototype have been added, but the playback/rendering pipeline and applied configuration require further integration. Linking libmpv is not evidence of working video output or hardware decoding. Resize, output changes, audio control and fallback paths need explicit tests.
 
 ### More tools
 
-A polkit agent. The color picker (AbyssPicker) and the blue-light filter (AbyssDusk) already exist, see [Tools](/wiki/tools).
+A polkit agent, the color picker (AbyssPicker) and the blue-light filter (AbyssDusk) exist. Configuration consistency, service activation and real-session behavior are part of the remaining review, see [Tools](/wiki/tools).
 
 ### Documentation
 
