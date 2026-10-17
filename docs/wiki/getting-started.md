@@ -1,103 +1,116 @@
-# Getting started
+# Installation
 
-::: warning Work in progress
-Abyss is in early development (0.x). There are no release packages yet, so for now you build everything from source. Expect rough edges and changing details.
+Install Abyss through the package source for your distribution. The repositories
+cover the compositor, its libraries, desktop portal and companion tools. Your
+package manager installs dependencies and owns the installed files.
+
+::: warning Early development
+The first experimental package publication is being prepared. Public packaging
+recipes are available for all 17 projects; a recipe repository does not mean
+that its binary package source is already online. Real-session tests are still
+pending. Check the status below before following installation commands.
 :::
 
-## What you get
+## Package sources
 
-Abyss is not a single program but a stack: the compositor **Abyssland** plus a set of libraries it needs (see [Ecosystem](/wiki/ecosystem)). All of them are built into one private prefix, `/opt/abyss`, and do not touch the system packages of the original Hyprland stack. They can live next to a Hyprland installation.
+| Distribution | Package source | Status |
+|---|---|---|
+| Fedora | [COPR: bb8therobot1717/abyss](https://copr.fedorainfracloud.org/coprs/bb8therobot1717/abyss/) · [Recipes](https://github.com/AbyssWM/fedora-builds) | First publication being configured; targets Fedora 44 and 45 on x86_64 |
+| Ubuntu | Launchpad PPA · [Recipes](https://github.com/AbyssWM/ubuntu-builds) | Recipes prepared; PPA publication pending |
+| Debian | APT repository · [Recipes](https://github.com/AbyssWM/debian-builds) | Recipes prepared; signed APT source pending |
+| Void Linux | XBPS repository · [Recipes](https://github.com/AbyssWM/void-builds) | All 17 primary packages built on x86_64/glibc; public binary source pending |
+| Gentoo | [Overlay](https://github.com/AbyssWM/gentoo-builds) | All 17 ebuilds available; complete native verification in progress |
+| Arch Linux | AUR · [PKGBUILDs](https://github.com/AbyssWM/arch-builds) | All 17 recipes available; AUR publication and native verification pending |
+| Linux Mint | Matching Ubuntu package source | Depends on the Mint version's Ubuntu base and separate compatibility tests |
+| LMDE | Matching Debian package source | Depends on its Debian base and separate compatibility tests |
 
-The development platform is **Void Linux**. The build uses GCC 14 and is distro-neutral in principle, but only Void is tested at the moment.
+## Fedora
 
-## Requirements
+The COPR project is intended to provide all 17 primary packages and seven
+library development packages in one repository. Build targets are
+`fedora-44-x86_64` and `fedora-45-x86_64`. Check the project's build results for
+your version: a configured target is not proof of a successful build.
 
-- A C++ toolchain: GCC 14 (or newer), `cmake`, `ninja`, `meson`, `pkg-config`
-- The usual Wayland compositor development packages (wayland, wayland-protocols, libdrm, pixman, cairo, pango, libxkbcommon, ...)
-- Additionally, these development libraries (names as on Void Linux, other distributions name them similarly):
+Once the packages have successfully built and been published:
 
-| Purpose | Void package |
+```sh
+sudo dnf copr enable bb8therobot1717/abyss
+sudo dnf install abyssland
+```
+
+This installs the compositor and its package dependencies. Companion tools can
+be selected separately:
+
+| Package | Purpose |
 |---|---|
-| Build tools | `meson`, `ninja` |
-| Hyprland-derived dependencies | `glaze`, `re2-devel`, `muparser-devel`, `libei-devel`, `pugixml-devel`, `tomlplusplus-devel`, `sdbus-c++-devel` |
-| X11 / XWayland | `xcb-util-errors-devel`, `xcb-util-wm-devel` |
-| Display and input | `libdisplay-info-devel`, `libseat-devel`, `libinput-devel` |
-| Image formats | `librsvg-devel`, `libzip-devel`, `file-devel`, `libjxl-devel`, `libheif-devel` |
-| Shaders | `glslang-devel`, `SPIRV-Tools-devel` |
-| Misc | `lua55-devel`, `qt6-base-devel`, `readline-devel` |
+| `xdg-desktop-portal-abyss` | Desktop portal and share picker |
+| `abyss-guiutils` | Dialogs, launcher and welcome/update screens |
+| `abysslock` | Lock screen |
+| `abysspaper` | Wallpaper application |
+| `abyssdusk` | Color temperature control |
+| `abysspicker` | Color picker |
+| `abysspolkit` | Polkit authentication agent |
 
-::: tip
-The list above is what the project's own setup script installs. Package names differ between distributions, and the list may shrink as Abyssland drops more legacy parts (it already no longer ships Lua configs or plugins).
-:::
-
-## Build from source
-
-Clone the [Abyss repositories](/wiki/ecosystem) next to each other, together with the build tools (`tools/build.sh` and `tools/setup-root.sh` in the project's main checkout).
-
-### 1. One-time root setup
-
-The setup script runs once as root. It installs the build packages, creates the install prefix and writes the session entry for your display manager:
+For example, after publication:
 
 ```sh
-sudo sh tools/setup-root.sh
+sudo dnf install abysspaper
 ```
 
-It does three things:
+Installing a tool does not by itself configure it or start its user service.
+See [Tools](/wiki/tools) and the individual source repositories for current
+behavior. Package availability does not imply every feature has been tested.
 
-- installs the packages listed above (Void Linux: via `xbps-install`)
-- creates `/opt/abyss` and hands it to your user, so that **all later builds need no root**
-- writes `/usr/share/wayland-sessions/abyssland.desktop` (the session **Abyssland** for SDDM and other display managers) and links the portal files into `/usr/share/xdg-desktop-portal` and `/usr/share/dbus-1/services`
+## Ubuntu, Debian and Mint
 
-On another distribution, do the same by hand: install the dependencies, create a writable `/opt/abyss`, and add a Wayland session that runs `dbus-run-session /opt/abyss/bin/start-abyssland`.
+The Ubuntu and Debian packaging repositories each contain definitions for all
+17 projects. Their APT sources are not published yet; no repository-add command
+is available at this stage. Ubuntu series must be selected and their dependency
+versions verified before PPA uploads.
 
-### 2. Build everything
+Ubuntu-based Mint will need packages for its matching Ubuntu base; LMDE needs
+packages for its matching Debian base. A PPA is not automatically enabled on
+Mint. Installation instructions will be added with the corresponding published
+source and tested release combinations.
 
-```sh
-sh tools/build.sh
-```
+## Void Linux
 
-The script builds and installs into `/opt/abyss`, in dependency order:
+Use the [Void package repository](https://github.com/AbyssWM/void-builds) for
+current build results and package recipes. All 17 primary packages have built
+successfully with xbps-src on x86_64/glibc, including seven development
+subpackages. Installation and desktop tests remain open.
 
-1. Abyssutils
-2. Abyss-scanner
-3. Abyssland-protocols
-4. Abyssparse
-5. Abysswire
-6. Abyssgraphics
-7. Abyssal
-8. Abysscursor
-9. Abyssland
-10. Xdg-desktop-portal-abyss
+A signed, hosted XBPS source still needs to be published. Its URL and
+`xbps-install` instructions will be added here when available. The recipes can
+already be built using Void's package build system as documented in that repo.
 
-You can also build single repositories (`sh tools/build.sh Abyssal`), compile a different config (`ABYSS_CONFIG=/path/to/config.hpp sh tools/build.sh Abyssland`), or keep going after errors to collect all of them (`KEEP=1 sh tools/build.sh`). Logs land in `build-logs/`.
+## Gentoo
 
-### 3. Start a session
+The [Gentoo overlay](https://github.com/AbyssWM/gentoo-builds) contains all 17
+ebuilds with pinned source archives, manifests and dependencies. Gentoo builds
+the packages from source through Portage. Complete native validation is still
+in progress; follow the overlay README for its current status and setup.
 
-Pick **Abyssland** in your display manager (the session runs `dbus-run-session /opt/abyss/bin/start-abyssland`). To try it first without leaving your current desktop, run the compositor nested inside another Wayland session:
+## Arch Linux
 
-```sh
-/opt/abyss/bin/Abyssland
-```
+The [Arch package repository](https://github.com/AbyssWM/arch-builds) contains
+PKGBUILDs and `.SRCINFO` for all 17 projects. Native clean-chroot builds and AUR
+publication remain pending. Until an AUR entry is actually published, use the
+Git repository for recipe review and package-build instructions.
 
-## Your first config
+## Start the session
 
-Abyssland is configured by a C++ file, compiled into the compositor. The default lives in the source tree as `config.def.hpp` (like dwm's `config.def.h`). Your own config is `~/.config/abyss/config.hpp`. Learn how it works on the [Configuration](/wiki/configuration) page.
+After installing the compositor package, select **Abyssland** in your display
+manager. Packages install the compositor and session files under the normal
+system prefix, `/usr`; the old development prefix `/opt/abyss` is not the
+package installation path.
 
-After every change:
+The initial package builds use the public default C++ configuration. The
+[configuration reference](/wiki/configuration) describes the API and the
+intended user config at `~/.config/abyss/config.hpp`. Rebuilding that config from
+a package installation still requires a matching source/build environment and
+development dependencies; the complete packaged reload workflow is not yet
+validated.
 
-```sh
-abyssctl reload
-```
-
-## Packages
-
-Distribution packages are **coming with 1.0.0**:
-
-| Distribution | Plan |
-|---|---|
-| Arch Linux | AUR (`-git` and release packages) |
-| Fedora | COPR |
-| Void Linux | own xbps repository |
-| Gentoo | own overlay |
-
-Until then, building from source is the only way.
+Real-session and hardware testing follows the COPR publication. There is no
+separate setup script in the package installation flow.

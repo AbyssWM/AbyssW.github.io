@@ -38,11 +38,6 @@ The site is served at the root (`base: '/'`). If a custom domain is added later,
 
 ## License
 
-The documentation text is available under the BSD 3-Clause License, like the Abyss projects.
-Abyss is not affiliated with or endorsed by hyprwm.
-
-## License
-
 This website and its original documentation are licensed under BSD-3-Clause;
 see [LICENSE](LICENSE). Third-party dependencies retain their own licenses.
 Licenses for the compositor, libraries and package recipes are documented

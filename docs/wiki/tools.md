@@ -1,6 +1,9 @@
 # Tools
 
-Small companion tools forked from hyprwm projects. Both install to `/opt/abyss` with the rest of Abyss (`sh tools/build.sh AbyssDusk`, `sh tools/build.sh AbyssPicker`).
+Companion tools forked from hyprwm projects. Install them through your
+distribution's Abyss package source; see [Installation](/wiki/getting-started)
+for publication status. The package names are `abyssdusk` and `abysspicker`.
+Package installations use `/usr`, not the old `/opt/abyss` development prefix.
 
 ## AbyssDusk
 

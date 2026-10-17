@@ -10,7 +10,7 @@ hero:
     alt: Abyss logo
   actions:
     - theme: brand
-      text: Getting started
+      text: Installation
       link: /wiki/getting-started
     - theme: alt
       text: Configuration
@@ -39,7 +39,7 @@ features:
 <div class="home-notice">
 
 ::: warning Early development (0.x)
-Abyss is being built right now and is **not ready for daily use**. Version **1.0.0** will be the first usable release; distribution packages arrive with it. Parts of these docs are marked *work in progress*.
+Abyss is being built right now and is **not ready for daily use**. Experimental distribution packages are being prepared before 1.0.0, starting with Fedora COPR. See [Installation](/wiki/getting-started) for package sources and their publication status. Parts of these docs are marked *work in progress*.
 :::
 
 </div>

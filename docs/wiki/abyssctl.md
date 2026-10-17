@@ -1,5 +1,10 @@
 # abyssctl reference
 
+For distribution packages, the source/build environment needed by `reload` is
+not installed automatically with the compositor. The complete packaged reload
+workflow still needs validation; see [Installation](/wiki/getting-started).
+
+
 `abyssctl` talks to a running Abyssland: it queries state, sends commands and rebuilds the compiled config.
 
 ```

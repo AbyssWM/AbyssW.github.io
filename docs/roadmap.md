@@ -1,6 +1,6 @@
 # Roadmap
 
-Abyss is in early development (**0.x**). **1.0.0** is the first usable release and the start of the distribution packages. This page lists what is planned; the order is roughly by usefulness for everyday use.
+Abyss is in early development (**0.x**). Experimental packages are being prepared before **1.0.0**, starting with Fedora COPR. This page lists what is planned; the order is roughly by usefulness for everyday use.
 
 ::: warning Work in progress
 Nothing on this page is a promise of a date. Details may change.
@@ -53,14 +53,23 @@ A polkit agent, the color picker (AbyssPicker) and the blue-light filter (AbyssD
 
 This wiki grows with the project: a generated Abysslang reference and a guide to the differences from Hyprland.
 
-### Packages and 1.0.0
+### Package sources and 1.0.0
 
-- Release tarballs and tagged versions
-- **Arch Linux:** AUR
-- **Fedora:** COPR
-- **Void Linux:** own xbps repository
-- **Gentoo:** own overlay
-- Later, maybe: a Nix flake and Debian/Ubuntu packages
+All six distribution recipe repositories contain definitions for all 17 code
+projects. Publication status and installation instructions live on the
+[Installation](/wiki/getting-started) page.
+
+- **Fedora:** COPR first; target Fedora 44 and 45 on x86_64, then real-session tests
+- **Ubuntu:** Launchpad PPA after release/dependency selection and signed source uploads
+- **Debian:** a signed APT source
+- **Void Linux:** a signed XBPS source; the 17 primary packages have built on x86_64/glibc
+- **Gentoo:** a source overlay with all 17 ebuilds; native verification continues
+- **Arch Linux:** PKGBUILDs prepared, native verification and AUR publication pending
+- **Mint / LMDE:** test against the matching Ubuntu / Debian base
+
+Tagged releases, installation tests and the outstanding correctness work remain
+requirements for 1.0.0. Recipe preparation and successful builds alone do not
+establish everyday usability.
 
 ## Upstream
 

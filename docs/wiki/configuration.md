@@ -6,6 +6,13 @@
 Abysslang is under active development. The API below is taken from the current headers, but names and details may still change before 1.0.0.
 :::
 
+::: info Package installations
+The reference below describes the C++ API. Initial distribution packages use the
+public default configuration. `abyssctl reload` needs a matching source/build
+environment and permission to install the rebuilt binary; that workflow is
+still being validated for package installations. See [Installation](/wiki/getting-started).
+:::
+
 ## Concept
 
 - Your config is `~/.config/abyss/config.hpp`. It defines one function, `configure(Config&)`, which runs on every config load (at start and after `abyssctl reload`).
