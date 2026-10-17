@@ -57,6 +57,8 @@ Value helpers: `rgb(0xRRGGBB)`, `rgba(0xRRGGBB, alpha)` (alpha as `0..255` or `0
 
 An option can also be set by its string name with the same checks: `c.set("general:gaps_in", 5)`.
 
+The native setters for integer, boolean and float options reject non-finite numbers and numeric conversions outside the destination type's range. A rejected assignment preserves the previous value and its existing user-set state.
+
 Per-device settings use `c.device(name, {...})`, for example `c.device("logitech-mx-master", {.sensitivity = -0.5});`.
 
 ## Reading options
