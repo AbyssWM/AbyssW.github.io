@@ -15,7 +15,7 @@ pending. Check the status below before following installation commands.
 
 | Distribution | Package source | Status |
 |---|---|---|
-| Fedora | [COPR: bb8therobot1717/abyss](https://copr.fedorainfracloud.org/coprs/bb8therobot1717/abyss/) · [Recipes](https://github.com/AbyssWM/fedora-builds) | First publication being configured; targets Fedora 44 and 45 on x86_64 |
+| Fedora | [COPR: bb8therobot1717/Abyss](https://copr.fedorainfracloud.org/coprs/bb8therobot1717/Abyss/) · [Recipes](https://github.com/AbyssWM/fedora-builds) | Project created for Fedora 44 and 45 on x86_64; packages require successful builds before installation |
 | Ubuntu | Launchpad PPA · [Recipes](https://github.com/AbyssWM/ubuntu-builds) | Recipes prepared; PPA publication pending |
 | Debian | APT repository · [Recipes](https://github.com/AbyssWM/debian-builds) | Recipes prepared; signed APT source pending |
 | Void Linux | XBPS repository · [Recipes](https://github.com/AbyssWM/void-builds) | All 17 primary packages built on x86_64/glibc; public binary source pending |
@@ -34,7 +34,7 @@ your version: a configured target is not proof of a successful build.
 Once the packages have successfully built and been published:
 
 ```sh
-sudo dnf copr enable bb8therobot1717/abyss
+sudo dnf copr enable bb8therobot1717/Abyss
 sudo dnf install abyssland
 ```
 
